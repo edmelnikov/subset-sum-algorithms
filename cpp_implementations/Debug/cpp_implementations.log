@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\main.cpp(3,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  cpp_implementations.vcxproj -> C:\Users\user\Documents\studies\вкр\code\cpp_implementations\Debug\cpp_implementations.exe
