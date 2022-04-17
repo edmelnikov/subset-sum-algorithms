@@ -5,6 +5,7 @@
 #include <cmath>
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 std::vector<int> fft_polymul(const std::vector<int> &poly1, const std::vector<int>& poly2) {
 	int size1 = poly1.size();
@@ -75,34 +76,62 @@ std::vector<int> fft_polymul(const std::vector<int> &poly1, const std::vector<in
 }
 
 
-std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<int>& set2, int bound) {
+std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<int>& set2, int bound=-1) {
 	
 	/* initialize characteristic polynomials of sets with zeros */
 	// here, the size of a vector is "the largest integer in  a set (last item of a SORTED set)" + 1
 	// could be replaced with bound + 1
 
-
-	std::vector<int> set1_poly(
-		(set1.size() > 0) ? (set1.back() + 1) : (1),
-		0
-	);  // characteristic polynomial of the first set
-
-	std::vector<int> set2_poly(
-		(set2.size() > 0) ? (set2.back() + 1) : (1),
-		0
-	);  // characteristic polynomial of the second set
+	std::vector<int> set1_poly;
+	std::vector<int> set2_poly;
 
 	/* fill up both characteristic polynomials */
-	for (auto element : set1) {
-		set1_poly[element] += 1;
-	}
-	set1_poly[0] = 1; // monomial of degree 0 is added by default
-	for (auto element : set2) {
-		set2_poly[element] += 1;
-	}
-	set2_poly[0] = 1; // monomial of degree 0 is added by default
+	if (bound == -1) { // when there is no bound
+		set1_poly.resize(
+			(set1.size() > 0) ? (set1.back() + 1) : (1),
+			0
+		);
+		set2_poly.resize(
+			(set2.size() > 0) ? (set2.back() + 1) : (1),
+			0
+		);
 
+		for (auto element : set1) {
+			set1_poly[element] += 1;
+		}
+		set1_poly[0] = 1; // monomial of degree 0 is added by default
+		for (auto element : set2) {
+			set2_poly[element] += 1;
+		}
+		set2_poly[0] = 1; // monomial of degree 0 is added by default
 
+	}
+	else { // otherwise, if there is a specified bound 
+		set1_poly.resize(
+			(set1.size() > 0) ? (std::min(bound, set1.back()) + 1) : (1),
+			0
+		);
+		set2_poly.resize(
+			(set2.size() > 0) ? (std::min(bound, set2.back()) + 1) : (1),
+			0
+		);
+
+		for (auto element : set1) {
+			if (element <= set1_poly.size()) {
+				set1_poly[element] += 1;
+			}
+			else break;
+		}
+		set1_poly[0] = 1; // monomial of degree 0 is added by default
+		for (auto element : set2) {
+			if (element <= set2_poly.size()) {
+				set2_poly[element] += 1;
+			}
+			else break;
+		}
+		set2_poly[0] = 1; // monomial of degree 0 is added by default
+	}
+		
 	//for (auto element : set1_poly) {
 	//	std::cout << element << ' ';
 	//}
@@ -123,9 +152,13 @@ std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<i
 	product_set.reserve(product_poly.size()); // reserve enough space so that the vector is now resized during .push_back()'s
 
 	for (int i = 1; i < product_poly.size(); i++) {
-		if (product_poly[i] != 0) {
+		if (product_poly[i] != 0 && ((bound == -1) || (bound != 1 && i <= bound))) { // if bound is not set
 			product_set.push_back(i);
+
 		}
+		//if (product_poly[i] != 0) { // if bound is not set
+		//	product_set.push_back(i);
+		//}
 	}
 	return product_set;
 

@@ -12,10 +12,10 @@
 
 // SETS OF INTEGERS MUST BE SORTED!
 void main() {
-	
-	//std::vector<int> poly1 = { 1, 0, 1, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,1 };
-	//std::vector<int> poly2 = { 1, 0, 0, 0, 1, 1, 1,0,0,0,0,0,0,0,0,0,0,0,0};
-	//std::vector<int> poly2 = { 1, 0, 0, 0, 1, 1, 1 }; //  padding problem
+	// nine at the end?
+	//std::vector<int> poly1 = { 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 };
+	//std::vector<int> poly2 = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1};
+	////std::vector<int> poly2 = { 1, 0, 0, 0, 1, 1, 1 }; //  padding problem
 	//std::vector<int> result = fft_polymul(poly1, poly2);
 	//for (int i = 0; i < result.size(); i++) {
 	//	std::cout << result[i] << ", ";
@@ -24,43 +24,59 @@ void main() {
 
 
 	/* Minkowksy add test */
-	//std::vector<int> set1 = { 1, 5 ,8 };
-	//std::vector<int> set2 = { 4, 10 };
+	//std::vector<int> set1 = { 2, 8, 20 };
+	//std::vector<int> set2 = {3, 4, 15 };
 	//
-	//std::vector<int> set1 = {1 };
-	//std::vector<int> set2 = { 2};
+	///*std::vector<int> set1 = {1 };
+	//std::vector<int> set2 = { 2};*/
 
-	//int bound = 10;
+	//int bound = 17;
 	//std::vector<int> prod = minkowski_add(set1, set2, bound);
-	//std::cout << prod.size() << std::endl;
+	//// std::cout << prod.size() << std::endl;
 	//for (auto element : prod) {
 	//	std::cout << element << ' ';
 	//}
+	//std::cout << std::endl;
 
-
-	//std::vector<int> set = { 1, 5, 8, 9, 10, 12, 14, 15, 16 };
-	std::vector<int> set = { 3, 9, 15, 23 };
-	int target = 27;
-
+	// std::vector<int> set = { 1, 5, 8, 9, 10, 12, 14, 15, 16, 18, 27, 30 };
+	//std::vector<int> set = { 1, 2, 16, 17, 18, 27, 30 };
+	//std::vector<int> set = { 3, 9, 15, 23 };
 	
+	//int target = 27;
+
+	std::vector<int> set = { 2, 6, 7, 10, 12, 17, 18, 19, 21, 35, 36, 70, 71 };
+	int target = 69; 
+	//std::vector<int> set = { 3, 9, 15, 23 };
+	//int target = 70;
+	// in: 3, 9, 15, 23
+	// out: 3 9 12 15 18 23 24 26 27 32 35 38 41 47 50
+
 	auto bellman_solution = bellman_ssum(set, target);
-	std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << std::endl;
+	std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
 	
 
 	std::cout << "Bringmann stuff " << std::endl;
 	srand(time(0));
-	std::vector<int> res = ColorCoding(set, target, 4, 0.1);
+	auto bringmann_solution = bringmann_ssum(set, target, 0.1);
+	std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
+
+	// std::vector<int> res = ColorCoding(set, target, 4, 0.1);
 
 	//for (auto el : res) {
 	//	std::cout << el << " ";
 	//}
 	//std::cout << std::endl;
 	
-	ColorCodingLayer(set, target, 32, 0.2);
+	//std::vector<int> set_ = { 4, 5, 6, 10 };
+	//target = 10;
+	//std::vector<int> ssums = ColorCodingLayer(set_, target, 16, 0.025);
 
+	//for (auto el : ssums) {
+	//	std::cout << el << std::endl;
+	//}
+	//std::cout << std::endl;
 
-	// in: 3, 9, 15, 23
-	// out: 3 9 12 15 18 23 24 26 27 32 35 38 41 47 50
+	
 	
 	//auto bringmann_solution = bringmann_ssum(set, target);
 	//std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << std::endl;

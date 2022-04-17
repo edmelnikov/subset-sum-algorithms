@@ -1,4 +1,4 @@
-#include "fftw3.h"
+﻿#include "fftw3.h"
 #include <iostream>
 #include <stdio.h>
 #include <complex.h>
@@ -7,7 +7,10 @@
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
-#include <time.h> 
+#include <time.h>
+#include <utility>
+#include <chrono>
+
 #include "minkowski_sum.h"
 #include "n_choose_k.h"
 
@@ -92,13 +95,120 @@ std::vector<int> ColorCodingLayer(const std::vector<int>& set, int target, int l
 		return ColorCoding(set, target, layer, delta);
 	}
 	
-	int num_part = pow(2, ceil(log(layer / log_layer_delta) / log(2)));
-	std::cout << log_layer_delta << " " << num_part << std::endl;
-	
-	std::vector<std::vector<int>> set_partitioned;
+	int num_part = pow(2, ceil(log(layer / log_layer_delta) / log(2))); // number of partitions
+	// std::cout << log_layer_delta << " " << num_part << std::endl;
+	std::vector<std::vector<int>> set_partitioned = rand_part(set, num_part);
+	std::vector<std::vector<int>> set_partitioned_ssums(num_part, std::vector<int>()); // subset sums of a partitioned set
 
+	// std::vector<int> subset_sums;
+
+	for (int i = 0; i < num_part; i++) {
+		//std::cout << "Colorcoding parameters: t=" << ceil(2 * 6 * log_layer_delta * target / layer);
+		//std::cout << " k=" << ceil(6 * log_layer_delta) << " delta/layer=" << delta / layer << std::endl;
+
+		set_partitioned_ssums[i] = ColorCoding(
+			set_partitioned[i],
+			ceil(2*6*log_layer_delta*target/layer),
+			ceil(6*log_layer_delta),
+			delta/layer
+			);
+	}
+
+	// apply minkowski sum to all set_partitioned_ssums in a binary-tree-like way 
+	std::vector<std::vector<int>> curr_round = set_partitioned_ssums; // copying
+	
+	/* calculate the highest number of ssums that can be sampled from the set */
+	int num_sums = 0; 
+	for (int i = 0; i <= set.size(); i++) {  
+		num_sums += n_choose_k(set.size(), i);
+	}	
+	// std::vector<std::vector<int>> next_round(num_part, std::vector<int>());
+	// std::for_each(next_round.begin(), next_round.end(), [num_sums](std::vector<int>& subset) { subset.reserve(num_sums); });
+	std::vector<std::vector<int>> next_round;
+	next_round.reserve(num_part);  // reserve to fit all sets without resizing
+
+	for (int round = 0; round < log(num_part) / log(2); round++) { // iterate over levels of a tree from bottom to top (round = depth - level)
+		for (int j = 0; j < curr_round.size(); j += 2) {
+			if (j + 1 < curr_round.size()) {
+				next_round.push_back(minkowski_add(curr_round[j], curr_round[j+1], pow(2, round + 1)*2*6*log_layer_delta*target/layer));
+			}
+			else {
+				next_round.push_back(curr_round[j]);
+			}
+		}
+		curr_round.clear();
+		curr_round = next_round;
+		next_round.clear();
+	}
+
+	//for (auto set : curr_round) {
+	//	std::cout << "[";
+	//	for (auto sum : set) {
+	//		std::cout << sum << " ";
+	//	}
+	//	std::cout << "]" << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	/* intersect with {0, ... , target}*/
 	std::vector<int> res;
+
+	if (curr_round.size() != 0) {
+		res.reserve(curr_round[0].size());
+		for (auto el : curr_round[0]) {
+			if (el <= target) {
+				res.push_back(el);
+			}
+		}
+	}
 	return res;
 }
 
+std::pair<bool, double> bringmann_ssum(const std::vector<int>& set, int target, double delta) {
+	auto start_time = std::chrono::high_resolution_clock::now(); // time measurement
 
+	/* Split into ⌈log n⌉ layers*/
+	int num_layers = ceil(log(set.size()) / log(2)); // calculate number of layers
+
+	// std::vector<std::vector<int>> set_layers(num_layers, std::vector<int>()); // create a vector with layers
+	// std::for_each(set_layers.begin(), set_layers.end(), [set](std::vector<int>& layer) { layer.reserve(set.size()); });
+	
+	std::vector<int> layer_set;
+	layer_set.reserve(set.size());
+	int set_ind = 0;
+	double right_bound = (double)target / pow(2, num_layers - 1); // right bound of current layer
+	std::vector<int> layer_ssums;
+	std::vector<int> all_ssums = {};
+
+	for (int layer_ind = num_layers - 1; layer_ind >= 0; layer_ind--) { // iterate over layers backwards
+
+		while (set[set_ind] <= right_bound && set_ind < set.size()) { // check if current set's item fits into the layer
+			layer_set.push_back(set[set_ind]); // if it does, add it to current layer
+			set_ind++; // and increment index of a set
+		}
+		right_bound = (double)target / pow(2, layer_ind - 1); // recalculate the right bound once all the items have been added to current layer
+
+		//std::cout << "Color coding layer call with target " << target << ", layer " << pow(2, layer_ind + 1);
+		//std::cout << ", error probability " << delta / num_layers << std::endl;
+		//std::cout << "set " << std::endl;
+		//for (auto el : layer_set) {
+		//	std::cout << el << " ";
+		//}
+		//std::cout << std::endl;
+
+		layer_ssums = ColorCodingLayer(layer_set, target, pow(2, layer_ind + 1), delta/num_layers); // calculate all subset sums of a layer
+			
+		all_ssums = minkowski_add(all_ssums, layer_ssums, target); // NOTE: minkowsky sum always returns a sorted set
+		layer_set.clear();
+	}
+
+	bool solution = 0;
+	if (std::find(all_ssums.begin(), all_ssums.end(), target) != all_ssums.end()) {
+		solution = 1;
+	}
+
+	auto end_time = std::chrono::high_resolution_clock::now(); // time measurement
+	std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+	std::pair<bool, double> result(solution, running_time.count());
+	return result;
+}
