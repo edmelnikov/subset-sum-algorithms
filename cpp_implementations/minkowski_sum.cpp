@@ -75,7 +75,6 @@ std::vector<int> fft_polymul(const std::vector<int> &poly1, const std::vector<in
 	return res;
 }
 
-
 std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<int>& set2, int bound=-1) {
 	
 	/* initialize characteristic polynomials of sets with zeros */
@@ -160,6 +159,194 @@ std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<i
 		//	product_set.push_back(i);
 		//}
 	}
+	return product_set;
+
+}
+
+std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly1, std::vector<std::vector<int>>& poly2) {
+	int max_size1 = std::max(poly1.size(), poly1[0].size());
+	int max_size2 = std::max(poly2.size(), poly2[0].size());
+	int N = pow(2, ceil(log(2*std::max(max_size1, max_size2) + 1) / log(2))); // dimension of a resulting matrix with resulting polynomial coefficients rounded up to the next power of two
+	// std::cout << ceil(log(2 * std::max(max_size1, max_size2) + 1) / log(2)) << std::endl;
+
+	fftw_plan plan;
+	fftw_complex* fft_input = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N);  // array where input polynomial padded by zeros will be stored
+	fftw_complex* fft_output1 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N); // output of the FFT for the first polynomial
+	fftw_complex* fft_output2 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N); // output of the FFT for the second polynomial
+
+	/* first polynomial evaluation  */
+	/* fill up the array used as an fft input and pad it with zeros up to the length of n */
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			if (i < poly1.size() && j < poly1[i].size()) {
+				fft_input[i * N + j][0] = poly1[i][j];
+			
+			}
+			else {
+				fft_input[i * N + j][0] = 0;
+			}
+			fft_input[i * N + j][1] = 0;
+		}
+	}
+
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		std::cout<< fft_input[N*i + j][0] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	plan = fftw_plan_dft_2d(N, N, fft_input, fft_output1, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_execute(plan);
+
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		std::cout << fft_output1[N*i + j][0] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	///* Second polynomial evaluation */
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			if (i < poly2.size() && j < poly2[i].size()) {
+				fft_input[i * N + j][0] = poly2[i][j];
+
+			}
+			else {
+				fft_input[i * N + j][0] = 0;
+			}
+			fft_input[i * N + j][1] = 0;
+		}
+	}
+
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		std::cout << fft_input[N * i + j][0] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	plan = fftw_plan_dft_2d(N, N, fft_input, fft_output2, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_execute(plan);
+
+	//for (int i = 0; i < N; i++) {
+	//	for (int j = 0; j < N; j++) {
+	//		std::cout << fft_output2[N * i + j][0] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	/* Polynomial evaluations multiplication */
+	fftw_complex* poly_mul_evaluations = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N * N);
+	 
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			poly_mul_evaluations[N * i + j][0] = fft_output1[N * i + j][0] * fft_output2[N * i + j][0] - fft_output1[N * i + j][1] * fft_output2[N * i + j][1]; // real part
+			poly_mul_evaluations[N * i + j][1] = fft_output1[N * i + j][0] * fft_output2[N * i + j][1] + fft_output1[N * i + j][1] * fft_output2[N * i + j][0]; // imaginary part 
+		}
+	}
+
+	/* Interpolation */
+	fftw_complex* poly_mul = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N * N);  // multiplication product of two polynomials
+	plan = fftw_plan_dft_2d(N, N, poly_mul_evaluations, poly_mul, FFTW_BACKWARD, FFTW_ESTIMATE);
+	fftw_execute(plan);
+	fftw_destroy_plan(plan);
+
+	/* Divide all the values by N since FFTW computes unnormalized DFT  */
+	std::vector<std::vector<int>> res(N, std::vector<int>(N, 0));
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			res[i][j] = abs(round(poly_mul[N*i+j][0] /(N*N)));
+		}
+	}
+	return res;
+
+}
+
+std::vector<std::vector<int>> minkowski_add_2d(const std::vector<std::vector<int>>& set1, const std::vector<std::vector<int>>& set2, int bound = -1) {
+
+	/* initialize characteristic polynomials of sets with zeros */
+	// here, the size of a vector is "the largest integer in  a set (last item of a SORTED set)" + 1
+	// could be replaced with bound + 1
+
+	std::vector<std::vector<int>> set1_poly;
+	std::vector<std::vector<int>> set2_poly;
+
+	/* fill up both characteristic polynomials */
+	if (bound == -1) { // when there is no bound
+		/* set1 */
+		int max_first = 0;
+		int max_second = 0;
+		for (auto el : set1) {
+			if (el[0] > max_first) {
+				max_first = el[0];
+			}
+			if (el[1] > max_second) {
+				max_second = el[1];
+			}
+		}
+		set1_poly.resize(max_first + 1, std::vector<int>(max_second + 1, 0));
+
+		for (auto el : set1) {
+			set1_poly[el[0]][el[1]] += 1;
+		}
+		set1_poly[0][0] += 1;
+
+		//for (auto row : set1_poly) {
+		//	for (auto el : row) {
+		//		std::cout << el << " ";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		//std::cout << std::endl;
+
+		/* set2 */
+		max_first = 0;
+		max_second = 0;
+		for (auto el : set2) {
+			if (el[0] > max_first) {
+				max_first = el[0];
+			}
+			if (el[1] > max_second) {
+				max_second = el[1];
+			}
+		}
+		set2_poly.resize(max_first + 1, std::vector<int>(max_second + 1, 0));
+
+		for (auto el : set2) {
+			set2_poly[el[0]][el[1]] += 1;
+		}
+		set2_poly[0][0] += 1;
+
+		//for (auto row : set2_poly) {
+		//	for (auto el : row) {
+		//		std::cout << el << " ";
+		//	}
+		//	std::cout << std::endl;
+		//}
+		//std::cout << std::endl;
+
+	}
+
+	std::vector<std::vector<int>> product_poly = fft_polymul_2d(set1_poly, set2_poly); // characteristic polynomial of minkowski addition product
+
+	std::vector<std::vector<int>> product_set; // minkowski addition product (set)
+	product_set.reserve(product_poly.size() * product_poly.size()); // reserve enough space so that the vector is now resized during .push_back()'s (lazy solution)
+
+	for (int i = 1; i < product_poly.size(); i++) {
+		for (int j = 1; j < product_poly[i].size(); j++) {
+			if (product_poly[i][j] != 0) {
+				// std::vector<int> pair = { i, j };
+				product_set.push_back(std::vector<int>({i, j}));
+			}
+		}
+	}
+
 	return product_set;
 
 }

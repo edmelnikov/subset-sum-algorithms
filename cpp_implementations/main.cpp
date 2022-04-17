@@ -21,7 +21,33 @@ void main() {
 	//	std::cout << result[i] << ", ";
 	//}
 
+	//std::vector<std::vector<int>> mat1 = {
+	//	{1, 1},
+	//	{1, 1},
+	//	{0, 3}
+	//};
+	//std::vector<std::vector<int>> mat2 = {
+	//	{1, 0},
+	//	{0, 1},
+	//};
 
+	//std::vector<std::vector<int>> res = fft_polymul_2d(mat1, mat2);
+	//for (auto set : res) {
+	//	for (auto el : set) {
+	//		std::cout << el << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	std::vector<std::vector<int>> mat1 = {{1, 1}, {2, 3}};
+	std::vector<std::vector<int>> mat2 = {{4, 2}, {2, 1}};
+
+	std::vector<std::vector<int>> res = minkowski_add_2d(mat1, mat2);
+	
+	for (auto pair : res) {
+		std::cout << "(" << pair[0] << ", " << pair[1] << ") ";
+	}
+	std::cout << std::endl;
 
 	/* Minkowksy add test */
 	//std::vector<int> set1 = { 2, 8, 20 };
