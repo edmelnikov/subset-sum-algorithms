@@ -268,7 +268,8 @@ std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly
 
 }
 
-std::vector<std::vector<int>> minkowski_add_2d(const std::vector<std::vector<int>>& set1, const std::vector<std::vector<int>>& set2, int bound = -1) {
+/* TODO: add boundaries */
+std::vector<std::pair<int, int>> minkowski_add_2d(const std::vector<std::pair<int, int>>& set1, const std::vector<std::pair<int, int>>& set2, int bound = -1) {
 
 	/* initialize characteristic polynomials of sets with zeros */
 	// here, the size of a vector is "the largest integer in  a set (last item of a SORTED set)" + 1
@@ -283,17 +284,17 @@ std::vector<std::vector<int>> minkowski_add_2d(const std::vector<std::vector<int
 		int max_first = 0;
 		int max_second = 0;
 		for (auto el : set1) {
-			if (el[0] > max_first) {
-				max_first = el[0];
+			if (el.first > max_first) {
+				max_first = el.first;
 			}
-			if (el[1] > max_second) {
-				max_second = el[1];
+			if (el.second > max_second) {
+				max_second = el.second;
 			}
 		}
 		set1_poly.resize(max_first + 1, std::vector<int>(max_second + 1, 0));
 
 		for (auto el : set1) {
-			set1_poly[el[0]][el[1]] += 1;
+			set1_poly[el.first][el.second] += 1;
 		}
 		set1_poly[0][0] += 1;
 
@@ -309,17 +310,17 @@ std::vector<std::vector<int>> minkowski_add_2d(const std::vector<std::vector<int
 		max_first = 0;
 		max_second = 0;
 		for (auto el : set2) {
-			if (el[0] > max_first) {
-				max_first = el[0];
+			if (el.first > max_first) {
+				max_first = el.first;
 			}
-			if (el[1] > max_second) {
-				max_second = el[1];
+			if (el.second > max_second) {
+				max_second = el.second;
 			}
 		}
 		set2_poly.resize(max_first + 1, std::vector<int>(max_second + 1, 0));
 
 		for (auto el : set2) {
-			set2_poly[el[0]][el[1]] += 1;
+			set2_poly[el.first][el.second] += 1;
 		}
 		set2_poly[0][0] += 1;
 
@@ -335,14 +336,14 @@ std::vector<std::vector<int>> minkowski_add_2d(const std::vector<std::vector<int
 
 	std::vector<std::vector<int>> product_poly = fft_polymul_2d(set1_poly, set2_poly); // characteristic polynomial of minkowski addition product
 
-	std::vector<std::vector<int>> product_set; // minkowski addition product (set)
+	std::vector<std::pair<int, int>> product_set; // minkowski addition product (set)
 	product_set.reserve(product_poly.size() * product_poly.size()); // reserve enough space so that the vector is now resized during .push_back()'s (lazy solution)
 
-	for (int i = 1; i < product_poly.size(); i++) {
-		for (int j = 1; j < product_poly[i].size(); j++) {
+	for (int i = 0; i < product_poly.size(); i++) {
+		for (int j = 0; j < product_poly[i].size(); j++) {
 			if (product_poly[i][j] != 0) {
 				// std::vector<int> pair = { i, j };
-				product_set.push_back(std::vector<int>({i, j}));
+				product_set.push_back(std::pair<int, int>({i, j})); // NOTE: (0, 0) is also appended
 			}
 		}
 	}

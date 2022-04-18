@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="bellman_ssum.cpp" />
     <ClCompile Include="bringmann_ssum.cpp" />
+    <ClCompile Include="koiliaris_xu_ssum.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="minkowski_sum.cpp" />
     <ClCompile Include="n_choose_k.cpp" />
@@ -151,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="bellman_ssum.h" />
     <ClInclude Include="bringmann_ssum.h" />
+    <ClInclude Include="koiliaris_xu_ssum.h" />
     <ClInclude Include="minkowski_sum.h" />
     <ClInclude Include="n_choose_k.h" />
   </ItemGroup>

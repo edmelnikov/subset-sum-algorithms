@@ -30,19 +30,25 @@
     <ClCompile Include="n_choose_k.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="koiliaris_xu_ssum.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="minkowski_sum.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="bellman_ssum.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bringmann_ssum.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bellman_ssum.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="minkowski_sum.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="n_choose_k.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="koiliaris_xu_ssum.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

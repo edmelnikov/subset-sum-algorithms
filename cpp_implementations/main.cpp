@@ -5,7 +5,7 @@
 #include "bringmann_ssum.h"
 #include "bellman_ssum.h"
 #include "n_choose_k.h"
-
+#include "koiliaris_xu_ssum.h"
 
 #include <vector>
 #include <algorithm>
@@ -39,15 +39,45 @@ void main() {
 	//	std::cout << std::endl;
 	//}
 
-	std::vector<std::vector<int>> mat1 = {{1, 1}, {2, 3}};
-	std::vector<std::vector<int>> mat2 = {{4, 2}, {2, 1}};
+	//std::vector<std::pair<int, int>> mat1 = {{1, 1}, {2, 3}};
+	//std::vector<std::pair<int, int>> mat2 = {{4, 2}, {2, 1}};
+	//
+	//for (auto pair : mat1) {
+	//	std::cout << pair.first << std::endl;
+	//}
 
-	std::vector<std::vector<int>> res = minkowski_add_2d(mat1, mat2);
-	
-	for (auto pair : res) {
-		std::cout << "(" << pair[0] << ", " << pair[1] << ") ";
+
+	//std::vector<std::pair<int, int>> res = minkowski_add_2d(mat1, mat2);
+	//
+	//for (auto pair : res) {
+	//	std::cout << "(" << pair.first << ", " << pair.second << ") ";
+	//}
+	//std::cout << std::endl;
+
+	//std::vector<std::pair<int, int>> set1 = { {5, 1 }, {6, 1}, {11, 2} };
+	//std::vector<std::pair<int, int>> set2 = { {7, 1}, {9, 1}, {16, 2} };
+	//std::vector<std::pair<int, int>> res = ssum_card_set_union(set1, set2, 2, 5, 9);
+
+	//for (auto el : res) {
+	//	std::cout << "(" << el.first << ", " << el.second << ") ";
+	//}
+	//std::cout << std::endl;
+
+	std::vector<int> st = {5, 6, 7, 9};
+
+	//std::vector<std::pair<int, int>> res = compute_ssum_card_set(st, 4);
+
+	std::vector<int> res = compute_ssums_in_range(st, 100);
+
+	for (auto el : res) {
+		std::cout << el << " ";
 	}
 	std::cout << std::endl;
+	//for (auto el : res) {
+	//	std::cout << "(" << el.first << ", " << el.second << ") ";
+	//}
+	//std::cout << std::endl;
+
 
 	/* Minkowksy add test */
 	//std::vector<int> set1 = { 2, 8, 20 };
