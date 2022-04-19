@@ -16,7 +16,7 @@
 
 /* Function used in lemma 2.11 */
 /*
-	Given an element of a set B ⊆ [left_bound, ..., right_bound]×[0, ..., alpha], we compute the following function:
+	Given an element of a set B ⊆ [left_bound; right_bound]×[0, alpha], we compute the following function:
 	f((i, j)) = (i - xj, j) 
 */
 std::pair<int, int> function(const std::pair<int, int>& pair, int left_bound) {
@@ -36,7 +36,7 @@ std::pair<int, int> function_inverse(const std::pair<int, int>& pair, int left_b
 /* Lemma 2.11 */
 /*
 	Given two (ssum, card)-sets (ssum_card_set1 and ssum_card_set2) with cardinality bound alpha based on disjoint sets 
-	B, C ⊆ [left_bound, ..., right_bound] respectively, the following function computes (ssum, card)-set with cardinality 
+	B, C ⊆ [left_bound; right_bound] respectively, the following function computes (ssum, card)-set with cardinality 
 	bound alpha for a union of sets B, C
 */
 std::vector<std::pair<int, int>> ssum_card_set_union(const std::vector<std::pair<int, int>>& ssum_card_set1,
@@ -58,7 +58,7 @@ std::vector<std::pair<int, int>> ssum_card_set_union(const std::vector<std::pair
 	/* Apply minkowski sum to the sets of function outputs */
 	std::vector<std::pair<int, int>> min_add = minkowski_add_2d(ssum_card_set1_f, ssum_card_set2_f);
 
-	/* exclude out-of-bounds values ((X ⊕ Y ) ∩ ([0 : ℓα] × [0 : α]))*/
+	/* exclude out-of-bounds values ((X ⊕ Y ) ∩ ([0; ℓα] × [0; α]))*/
 	min_add.erase(
 		std::remove_if(
 			min_add.begin(),
@@ -111,7 +111,7 @@ std::vector<std::pair<int, int>> compute_ssum_card_set(const std::vector<int>& s
 
 /* Lemma 2.13 */
 /*
-	Given a set set S ⊆ [left_bound, ..., right_bound] (i. e., a set IN RANGE from left_bound to right_bound, hence the name of the function),
+	Given a set set S ⊆ [left_bound; right_bound] (i. e., a set IN RANGE from left_bound to right_bound, hence the name of the function),
 	the following function computes all subset sums less than or equal to ssum_bound using (ssum, card)-set
 	TODO: get rid of sorting either by utilizing std::set's or by changing compute_ssum_card_set() function
 */
@@ -140,22 +140,96 @@ std::vector<int> compute_ssums(const std::vector<int>& set, int ssum_bound) {
 	if (set.size() == 1) return std::vector<int>({set.front()}); // if a set contains only one element
 
 	int median_ind = set.size() / 2; // index of a set median
-	/* Bounds that a set belongs to */
-	int left_bound = set.front();
-	int right_bound = set.back();
 
 	/* Construct left and right subsets*/
 	std::vector<int>::const_iterator subset_start;
 	std::vector<int>::const_iterator subset_end;
-	/* left */
+		/* left */
 	subset_start = set.begin();
 	subset_end = set.begin() + median_ind;
 	std::vector<int> left_subset(subset_start, subset_end);
-	/* right */
+		/* right */
 	subset_start = set.begin() + median_ind;
 	subset_end = set.end();
 	std::vector<int> right_subset(subset_start, subset_end);
 
+	std::vector<int> left_ssums = compute_ssums(left_subset, ssum_bound);
+	std::vector<int> right_ssums = compute_ssums(right_subset, ssum_bound);
+
+	return minkowski_add(left_ssums, right_ssums, ssum_bound);
 }
 
-// std::vector<int> compute_ssums()
+/* Lemma 2.14 */
+/*
+	Given a set and a parameter r0 >= 1, the function partitions the set as follows:
+	set_part[0] = set ∩ [0, r0]
+	set_part[sset_ind] = set ∩ ( 2^(sset_ind-1)*r0; 2^(sset_ind)*r0 ]
+*/
+std::vector<std::vector<int>> partition(std::vector<int>& set, double r0) {
+	if (set.size() == 0) return std::vector<std::vector<int>>({{}});
+
+	/* Calculate number of subsets the set will be partitioned into */
+	int num_ssets = ceil(log(set.back() / r0) / log(2)) + 1;
+	if (num_ssets <= 0) {
+		num_ssets = 1;
+	}
+
+
+	/* Create a vector for partitioned set and reserve enough memory for each subset */
+	std::vector<std::vector<int>> set_part(num_ssets, std::vector<int>()); // partition of a set
+	std::for_each(set_part.begin(), set_part.end(), [set](std::vector<int>& sset) { sset.reserve(set.size()); });
+
+	/* Distribute set's items across subsets */
+	int sset_ind = 0; // subset index
+	int right_bound = pow(2, sset_ind)*r0; // right bound of current subset
+	for (auto el : set) {
+		while (el > right_bound && sset_ind < num_ssets) { // while element is larger than right_bound of current subset, we search for a bound that an element is less than or equal to 
+			sset_ind++;
+			right_bound = floor(pow(2, sset_ind) * r0);
+		}
+		set_part[sset_ind].push_back(el); // add element to its subset
+	}
+
+	return set_part;
+}
+
+/* Lemma 2.15 and Theorem 2.16 (main algorithm) */
+/*
+* 
+* 
+*/
+std::pair<bool, double> koiliaris_xu_ssum(std::vector<int>& set, int target, double r0=-1) {
+	if (r0 == -1) { // if r0 is unspecified
+		// r0 = set.back() / sqrt(set.size());
+		r0 = target / sqrt(set.size());
+	}
+	auto start_time = std::chrono::high_resolution_clock::now(); // time measurement
+
+	/* Calculate partition of a set */
+	std::vector<std::vector<int>> set_part = partition(set, r0);
+	
+	/* Calculate first subset's subset sums and add it to a vector of all subset sums of a set*/
+	std::vector<int> all_ssums = compute_ssums(set_part[0], target);
+	
+	/* Calculate subset sums for the rest subsets in the partition and combine them via minkowski addition*/
+	std::vector<int> ssums; // subset sums of current subset
+	for (auto it = set_part.begin() + 1; it != set_part.end(); it++) {
+		ssums = compute_ssums_in_range(*it, target);
+		all_ssums = minkowski_add(all_ssums, ssums, target);
+	}
+
+	//for (auto el : all_ssums) {
+	//	std::cout << el << " ";
+	//}
+	//std::cout << std::endl;
+
+	bool solution = 0;
+	if (std::find(all_ssums.begin(), all_ssums.end(), target) != all_ssums.end()) {
+		solution = 1;
+	}
+
+	auto end_time = std::chrono::high_resolution_clock::now(); // time measurement
+	std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+	std::pair<bool, double> result(solution, running_time.count());
+	return result;
+}

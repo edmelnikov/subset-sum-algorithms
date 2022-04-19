@@ -12,6 +12,27 @@
 
 // SETS OF INTEGERS MUST BE SORTED!
 void main() {
+
+
+	//std::vector<int> set = { 2, 6, 7, 10, 12, 17, 18, 19, 21, 35, 36, 70, 71 };
+	int target = 1000000;
+	std::vector<int> set = { 3, 9, 15, 23 };
+	//int target = 70;
+	// in: 3, 9, 15, 23
+	// out: 3 9 12 15 18 23 24 26 27 32 35 38 41 47 50
+
+	auto bellman_solution = bellman_ssum(set, target);
+	std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
+
+	auto koiliaris_xu_solution = koiliaris_xu_ssum(set, target); 
+	std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
+
+	srand(time(0));
+	auto bringmann_solution = bringmann_ssum(set, target, 0.1);
+	std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
+
+
+
 	// nine at the end?
 	//std::vector<int> poly1 = { 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 };
 	//std::vector<int> poly2 = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1};
@@ -63,16 +84,8 @@ void main() {
 	//}
 	//std::cout << std::endl;
 
-	std::vector<int> st = {5, 6, 7, 9};
 
 	//std::vector<std::pair<int, int>> res = compute_ssum_card_set(st, 4);
-
-	std::vector<int> res = compute_ssums_in_range(st, 100);
-
-	for (auto el : res) {
-		std::cout << el << " ";
-	}
-	std::cout << std::endl;
 	//for (auto el : res) {
 	//	std::cout << "(" << el.first << ", " << el.second << ") ";
 	//}
@@ -100,21 +113,7 @@ void main() {
 	
 	//int target = 27;
 
-	std::vector<int> set = { 2, 6, 7, 10, 12, 17, 18, 19, 21, 35, 36, 70, 71 };
-	int target = 69; 
-	//std::vector<int> set = { 3, 9, 15, 23 };
-	//int target = 70;
-	// in: 3, 9, 15, 23
-	// out: 3 9 12 15 18 23 24 26 27 32 35 38 41 47 50
-
-	auto bellman_solution = bellman_ssum(set, target);
-	std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
 	
-
-	std::cout << "Bringmann stuff " << std::endl;
-	srand(time(0));
-	auto bringmann_solution = bringmann_ssum(set, target, 0.1);
-	std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
 
 	// std::vector<int> res = ColorCoding(set, target, 4, 0.1);
 
