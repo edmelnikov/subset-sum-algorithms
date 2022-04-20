@@ -164,28 +164,30 @@ std::vector<int> minkowski_add(const std::vector<int>& set1, const std::vector<i
 }
 
 std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly1, std::vector<std::vector<int>>& poly2) {
-	int max_size1 = std::max(poly1.size(), poly1[0].size());
-	int max_size2 = std::max(poly2.size(), poly2[0].size());
-	int N = pow(2, ceil(log(2*std::max(max_size1, max_size2) + 1) / log(2))); // dimension of a resulting matrix with resulting polynomial coefficients rounded up to the next power of two
-	// std::cout << ceil(log(2 * std::max(max_size1, max_size2) + 1) / log(2)) << std::endl;
+	// int max_size1 = std::max(poly1.size(), poly1[0].size());
+	// int max_size2 = std::max(poly2.size(), poly2[0].size());
+
+	int num_rows = pow(2, ceil(log(poly1.size() + poly2.size() - 1) / log(2))); // num of rows of a resulting matrix with resulting polynomial
+	// coefficients rounded up to the next power of two
+	int num_cols = pow(2, ceil(log(poly1.front().size() + poly2.front().size() - 1) / log(2))); // num of cols of a resulting matrix with resulting polynomial
+	// coefficients rounded up to the next power of two
 
 	fftw_plan plan;
-	fftw_complex* fft_input = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N);  // array where input polynomial padded by zeros will be stored
-	fftw_complex* fft_output1 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N); // output of the FFT for the first polynomial
-	fftw_complex* fft_output2 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N*N); // output of the FFT for the second polynomial
+	fftw_complex* fft_input = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * num_rows * num_cols);  // array where input polynomial padded by zeros will be stored
+	fftw_complex* fft_output1 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * num_rows * num_cols); // output of the FFT for the first polynomial
+	fftw_complex* fft_output2 = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * num_rows * num_cols); // output of the FFT for the second polynomial
 
 	/* first polynomial evaluation  */
 	/* fill up the array used as an fft input and pad it with zeros up to the length of n */
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
+	for (int i = 0; i < num_rows; i++) {
+		for (int j = 0; j < num_cols; j++) {
 			if (i < poly1.size() && j < poly1[i].size()) {
-				fft_input[i * N + j][0] = poly1[i][j];
-			
+				fft_input[i * num_cols + j][0] = poly1[i][j];
 			}
 			else {
-				fft_input[i * N + j][0] = 0;
+				fft_input[i * num_cols + j][0] = 0;
 			}
-			fft_input[i * N + j][1] = 0;
+			fft_input[i * num_cols + j][1] = 0;
 		}
 	}
 
@@ -197,7 +199,7 @@ std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly
 	//}
 	//std::cout << std::endl;
 
-	plan = fftw_plan_dft_2d(N, N, fft_input, fft_output1, FFTW_FORWARD, FFTW_ESTIMATE);
+	plan = fftw_plan_dft_2d(num_rows, num_cols, fft_input, fft_output1, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(plan);
 
 	//for (int i = 0; i < N; i++) {
@@ -209,16 +211,16 @@ std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly
 	//std::cout << std::endl;
 
 	///* Second polynomial evaluation */
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
+	for (int i = 0; i < num_rows; i++) {
+		for (int j = 0; j < num_cols; j++) {
 			if (i < poly2.size() && j < poly2[i].size()) {
-				fft_input[i * N + j][0] = poly2[i][j];
+				fft_input[i * num_cols + j][0] = poly2[i][j];
 
 			}
 			else {
-				fft_input[i * N + j][0] = 0;
+				fft_input[i * num_cols + j][0] = 0;
 			}
-			fft_input[i * N + j][1] = 0;
+			fft_input[i * num_cols + j][1] = 0;
 		}
 	}
 
@@ -230,7 +232,7 @@ std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly
 	//}
 	//std::cout << std::endl;
 
-	plan = fftw_plan_dft_2d(N, N, fft_input, fft_output2, FFTW_FORWARD, FFTW_ESTIMATE);
+	plan = fftw_plan_dft_2d(num_rows, num_cols, fft_input, fft_output2, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(plan);
 
 	//for (int i = 0; i < N; i++) {
@@ -242,26 +244,26 @@ std::vector<std::vector<int>> fft_polymul_2d(std::vector<std::vector<int>>& poly
 	//std::cout << std::endl;
 
 	/* Polynomial evaluations multiplication */
-	fftw_complex* poly_mul_evaluations = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N * N);
+	fftw_complex* poly_mul_evaluations = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * num_rows * num_cols);
 	 
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
-			poly_mul_evaluations[N * i + j][0] = fft_output1[N * i + j][0] * fft_output2[N * i + j][0] - fft_output1[N * i + j][1] * fft_output2[N * i + j][1]; // real part
-			poly_mul_evaluations[N * i + j][1] = fft_output1[N * i + j][0] * fft_output2[N * i + j][1] + fft_output1[N * i + j][1] * fft_output2[N * i + j][0]; // imaginary part 
+	for (int i = 0; i < num_rows; i++) {
+		for (int j = 0; j < num_cols; j++) {
+			poly_mul_evaluations[num_cols * i + j][0] = fft_output1[num_cols * i + j][0] * fft_output2[num_cols * i + j][0] - fft_output1[num_cols * i + j][1] * fft_output2[num_cols * i + j][1]; // real part
+			poly_mul_evaluations[num_cols * i + j][1] = fft_output1[num_cols * i + j][0] * fft_output2[num_cols * i + j][1] + fft_output1[num_cols * i + j][1] * fft_output2[num_cols * i + j][0]; // imaginary part 
 		}
 	}
 
 	/* Interpolation */
-	fftw_complex* poly_mul = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N * N);  // multiplication product of two polynomials
-	plan = fftw_plan_dft_2d(N, N, poly_mul_evaluations, poly_mul, FFTW_BACKWARD, FFTW_ESTIMATE);
+	fftw_complex* poly_mul = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * num_rows * num_cols);  // multiplication product of two polynomials
+	plan = fftw_plan_dft_2d(num_rows, num_cols, poly_mul_evaluations, poly_mul, FFTW_BACKWARD, FFTW_ESTIMATE);
 	fftw_execute(plan);
 	fftw_destroy_plan(plan);
 
-	/* Divide all the values by N since FFTW computes unnormalized DFT  */
-	std::vector<std::vector<int>> res(N, std::vector<int>(N, 0));
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
-			res[i][j] = abs(round(poly_mul[N*i+j][0] /(N*N)));
+	/* Divide all the values since FFTW computes unnormalized DFT  */
+	std::vector<std::vector<int>> res(num_rows, std::vector<int>(num_cols, 0));
+	for (int i = 0; i < num_rows; i++) {
+		for (int j = 0; j < num_cols; j++) {
+			res[i][j] = abs(round(poly_mul[num_cols * i + j][0] /(num_rows * num_cols)));
 		}
 	}
 	return res;

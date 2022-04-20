@@ -9,175 +9,143 @@
 
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+
+std::pair<bool, double> test_algorithm(const std::vector<int>& set, int target, int num_runs, std::string alg_name, double delta = 0.1) {
+
+	std::pair<bool, double> solution;
+	double mean_time = 0;
+	for (int run = 0; run < num_runs; run++) {
+		if (alg_name == "bellman") {
+			solution = bellman_ssum(set, target);
+		}
+		else if (alg_name == "koiliaris_xu") {
+			solution = koiliaris_xu_ssum(set, target);
+		}
+		else if (alg_name == "bringmann") {
+			solution = bringmann_ssum(set, target, delta);
+		}
+		mean_time += solution.second;
+	}
+
+	mean_time = mean_time / num_runs;
+
+	return std::pair<bool, double>({solution.first, mean_time });
+}
 
 // SETS OF INTEGERS MUST BE SORTED!
-void main() {
+int main(int argc, char *argv[]) {
 
-
-	//std::vector<int> set = { 2, 6, 7, 10, 12, 17, 18, 19, 21, 35, 36, 70, 71 };
-	int target = 1000000;
-	std::vector<int> set = { 3, 9, 15, 23 };
-	//int target = 70;
-	// in: 3, 9, 15, 23
-	// out: 3 9 12 15 18 23 24 26 27 32 35 38 41 47 50
-
-	auto bellman_solution = bellman_ssum(set, target);
-	std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
-
-	auto koiliaris_xu_solution = koiliaris_xu_ssum(set, target); 
-	std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
-
-	srand(time(0));
-	auto bringmann_solution = bringmann_ssum(set, target, 0.1);
-	std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
-
-
-
-	// nine at the end?
-	//std::vector<int> poly1 = { 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0 };
-	//std::vector<int> poly2 = { 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-	////std::vector<int> poly2 = { 1, 0, 0, 0, 1, 1, 1 }; //  padding problem
-	//std::vector<int> result = fft_polymul(poly1, poly2);
-	//for (int i = 0; i < result.size(); i++) {
-	//	std::cout << result[i] << ", ";
-	//}
-
-	//std::vector<std::vector<int>> mat1 = {
-	//	{1, 1},
-	//	{1, 1},
-	//	{0, 3}
-	//};
-	//std::vector<std::vector<int>> mat2 = {
-	//	{1, 0},
-	//	{0, 1},
-	//};
-
-	//std::vector<std::vector<int>> res = fft_polymul_2d(mat1, mat2);
-	//for (auto set : res) {
-	//	for (auto el : set) {
-	//		std::cout << el << " ";
-	//	}
+	//std::vector<std::pair<int, int>> set1 = { {3, 1}, {4, 2}, {5, 2} };
+	//std::vector<std::pair<int, int>> set2 = { {1, 1}, {2, 2}, {3, 3} };
+	//	std::vector<std::pair<int, int>> set = minkowski_add_2d(set1, set2);
+	//for (auto el : set) {
+	//	std::cout << "(" << el.first << ", " << el.second << ") ";
 	//	std::cout << std::endl;
 	//}
-
-	//std::vector<std::pair<int, int>> mat1 = {{1, 1}, {2, 3}};
-	//std::vector<std::pair<int, int>> mat2 = {{4, 2}, {2, 1}};
-	//
-	//for (auto pair : mat1) {
-	//	std::cout << pair.first << std::endl;
-	//}
-
-
-	//std::vector<std::pair<int, int>> res = minkowski_add_2d(mat1, mat2);
-	//
-	//for (auto pair : res) {
-	//	std::cout << "(" << pair.first << ", " << pair.second << ") ";
-	//}
 	//std::cout << std::endl;
 
-	//std::vector<std::pair<int, int>> set1 = { {5, 1 }, {6, 1}, {11, 2} };
-	//std::vector<std::pair<int, int>> set2 = { {7, 1}, {9, 1}, {16, 2} };
-	//std::vector<std::pair<int, int>> res = ssum_card_set_union(set1, set2, 2, 5, 9);
-
-	//for (auto el : res) {
-	//	std::cout << "(" << el.first << ", " << el.second << ") ";
-	//}
-	//std::cout << std::endl;
-
-
-	//std::vector<std::pair<int, int>> res = compute_ssum_card_set(st, 4);
-	//for (auto el : res) {
-	//	std::cout << "(" << el.first << ", " << el.second << ") ";
-	//}
-	//std::cout << std::endl;
-
-
-	/* Minkowksy add test */
-	//std::vector<int> set1 = { 2, 8, 20 };
-	//std::vector<int> set2 = {3, 4, 15 };
-	//
-	///*std::vector<int> set1 = {1 };
-	//std::vector<int> set2 = { 2};*/
-
-	//int bound = 17;
-	//std::vector<int> prod = minkowski_add(set1, set2, bound);
-	//// std::cout << prod.size() << std::endl;
-	//for (auto element : prod) {
-	//	std::cout << element << ' ';
-	//}
-	//std::cout << std::endl;
-
-	// std::vector<int> set = { 1, 5, 8, 9, 10, 12, 14, 15, 16, 18, 27, 30 };
-	//std::vector<int> set = { 1, 2, 16, 17, 18, 27, 30 };
-	//std::vector<int> set = { 3, 9, 15, 23 };
+	if (argc == 0) {
+		std::cout << "Input file is not specified! " << std::endl;
+		return 1;
+	}
+	else if (argc == 1) {
+		std::cout << "Algorithm is not specified! " << std::endl;
+		return 1;
+	}
+	else if (argc == 2) {
+		std::cout << "Number of experiments is not specified! " << std::endl;
+		return 1;
+	}
+	std::string filename = argv[1];
+	std::string algorithm = argv[2];
+	int num_runs = std::stoi(argv[3]);
+	std::vector<int> set;
+	int target = 0;
 	
-	//int target = 27;
+	std::ifstream fin;
+	fin.open(filename);
+	if (fin.is_open()) {
+		std::string line;
+		/* read the first line with a set */
+		getline(fin, line);
+		std::stringstream text_stream(line);
+		std::string number;
+		while (std::getline(text_stream, number, ' ')) {
+			set.push_back(std::stoi(number));
+		}
 
-	
+		/* read second line with target integer (unsafe)*/
+		getline(fin, line);
+		target = std::stoi(line);
 
-	// std::vector<int> res = ColorCoding(set, target, 4, 0.1);
+		std::cout << "Input set size: " << set.size() << std::endl;
+		//for (auto el : set) {
+		//	std::cout << el << " ";
+		//}
+		std::cout << "Target: " << target << std::endl << std::endl;
 
-	//for (auto el : res) {
-	//	std::cout << el << " ";
-	//}
-	//std::cout << std::endl;
-	
-	//std::vector<int> set_ = { 4, 5, 6, 10 };
-	//target = 10;
-	//std::vector<int> ssums = ColorCodingLayer(set_, target, 16, 0.025);
+		/* Check algorithm name */
+		if (algorithm == "all") {
+			std::cout << "--- Running all algorithms ---" << std::endl;
 
-	//for (auto el : ssums) {
-	//	std::cout << el << std::endl;
-	//}
-	//std::cout << std::endl;
+			auto bellman_solution = test_algorithm(set, target, num_runs, "bellman");
+			std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
+			bellman_solution = bellman_ssum(set, target);
 
-	
-	
-	//auto bringmann_solution = bringmann_ssum(set, target);
-	//std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << std::endl;
+			auto koiliaris_xu_solution = test_algorithm(set, target, num_runs, "koiliaris_xu");
+			std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
+			
+			srand(time(0));
+			auto bringmann_solution = test_algorithm(set, target, num_runs, "bringmann", 0.2);
+			std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
+		
+			return 0;
+		}
+		else if (algorithm == "bellman") {
+			std::cout << "--- Running Bellman's algorithm ---" << std::endl;
+			auto bellman_solution = test_algorithm(set, target, num_runs, "bellman");
+			std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
 
-	//int k = 4;
-	//std::vector<std::vector<int>> part = rand_part(set, 4, 42);
+			return 0;
+		}
+		else if (algorithm == "koiliaris_xu") {
+			std::cout << "--- Running Koiliaris & Xu's algorithm --- " << std::endl;
+			auto koiliaris_xu_solution = test_algorithm(set, target, num_runs, "koiliaris_xu");
+			std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
 
-	//for (auto subset : part) {
-	//	std::cout << subset.size() << std::endl;
-	//	for (auto element : subset) {
-	//		std::cout << element << " ";
-	//	}
-	//	std::cout << std::endl;
-	//}
+			return 0;
+		}
+		else if (algorithm == "bringmann") {
+			std::cout << "--- Running Bringmann's algorithm ---" << std::endl;
+			srand(time(0));
+			auto bringmann_solution = test_algorithm(set, target, num_runs, "bringmann", 0.1);
+			std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
 
-
-	//std::vector<int> set1 = {1, 2};
-	//std::vector<int> set2 = { 4, 10 };
-	//std::vector<int> set3 = { 5, 12 };
-	//std::vector<int> un;
-
-	//un.reserve(10);
-	//// std::vector<int>::iterator it;
-
-	//auto it = std::set_union(set1.begin(), set1.end(), set2.begin(), set2.end(), std::back_inserter(un));
-	//std::vector<int> un_old;
-	//un_old = un;
-	//un.clear();
-	//for (auto el : un) {
-	//	std::cout << ' ' << el;
-	//}
-	//std::cout << '\n';
-
-	//for (auto el : un_old) {
-	//	std::cout << ' ' << el;
-	//}
-	//std::cout << '\n';
-
-
-	//std::set_union(un_old.begin(), un_old.end(), set3.begin(), set3.end(), std::back_inserter(un));
+			return 0;
+		}
+		else {
+			std::cout << "No such algorithm! " << std::endl;
+			return 1;
+		}
+	}
+	else {
+		std::cout << "File " << filename << " was not found!" << std::endl;
+		return 1;
+	}
 
 
-	//for (auto el : un) {
-	//	std::cout << ' ' << el;
-	//}
-	//std::cout << '\n';
+	//auto bellman_solution = bellman_ssum(set, target);
+	//std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
 
-	//std::cout << n_choose_k(4, 2) << std::endl;
+	//auto koiliaris_xu_solution = koiliaris_xu_ssum(set, target); 
+	//std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
+
+	//srand(time(0));
+	//auto bringmann_solution = bringmann_ssum(set, target, 0.1);
+	//std::cout << "Bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
+
+	return 0;
 }

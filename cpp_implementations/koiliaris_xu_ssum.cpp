@@ -82,8 +82,10 @@ std::vector<std::pair<int, int>> ssum_card_set_union(const std::vector<std::pair
 	Given a set and bound alpha the following function computes a (ssum, card)-set with cardinality bound alpha for the set
 */
 std::vector<std::pair<int, int>> compute_ssum_card_set(const std::vector<int>& set, int alpha) {
+	if (set.size() == 0) return std::vector<std::pair<int, int>>({ {0, 0} });
 	if (set.size() == 1) return std::vector<std::pair<int, int>>({{set[0], 1}}); // if a set contains only one element
 	
+
 	int median_ind = set.size() / 2; // index of a set median
 	/* Bounds that a set belongs to */
 	int left_bound = set.front();
@@ -137,6 +139,7 @@ std::vector<int> compute_ssums_in_range(const std::vector<int>& set, int ssum_bo
 	Given a set with total sum σ, the following function computes all of its subset sums in O(σ log(σ)log(n))
 */
 std::vector<int> compute_ssums(const std::vector<int>& set, int ssum_bound) {
+	if (set.size() == 0) return std::vector<int>({0});
 	if (set.size() == 1) return std::vector<int>({set.front()}); // if a set contains only one element
 
 	int median_ind = set.size() / 2; // index of a set median
@@ -165,7 +168,7 @@ std::vector<int> compute_ssums(const std::vector<int>& set, int ssum_bound) {
 	set_part[0] = set ∩ [0, r0]
 	set_part[sset_ind] = set ∩ ( 2^(sset_ind-1)*r0; 2^(sset_ind)*r0 ]
 */
-std::vector<std::vector<int>> partition(std::vector<int>& set, double r0) {
+std::vector<std::vector<int>> partition(const std::vector<int>& set, double r0) {
 	if (set.size() == 0) return std::vector<std::vector<int>>({{}});
 
 	/* Calculate number of subsets the set will be partitioned into */
@@ -198,10 +201,10 @@ std::vector<std::vector<int>> partition(std::vector<int>& set, double r0) {
 * 
 * 
 */
-std::pair<bool, double> koiliaris_xu_ssum(std::vector<int>& set, int target, double r0=-1) {
+std::pair<bool, double> koiliaris_xu_ssum(const std::vector<int>& set, int target, double r0=-1) {
 	if (r0 == -1) { // if r0 is unspecified
-		// r0 = set.back() / sqrt(set.size());
-		r0 = target / sqrt(set.size());
+		r0 = set.back() / sqrt(set.size());
+		// r0 = target / sqrt(set.size());
 	}
 	auto start_time = std::chrono::high_resolution_clock::now(); // time measurement
 
@@ -224,9 +227,10 @@ std::pair<bool, double> koiliaris_xu_ssum(std::vector<int>& set, int target, dou
 	//std::cout << std::endl;
 
 	bool solution = 0;
-	if (std::find(all_ssums.begin(), all_ssums.end(), target) != all_ssums.end()) {
-		solution = 1;
-	}
+	//if (std::find(all_ssums.begin(), all_ssums.end(), target) != all_ssums.end()) {
+	//	solution = 1;
+	//}
+	solution = (target == all_ssums.back());
 
 	auto end_time = std::chrono::high_resolution_clock::now(); // time measurement
 	std::chrono::duration<double, std::milli> running_time = end_time - start_time;
