@@ -81,6 +81,7 @@ std::vector<std::pair<int, int>> ssum_card_set_union(const std::vector<std::pair
 /*
 	Given a set and bound alpha the following function computes a (ssum, card)-set with cardinality bound alpha for the set
 */
+/* Using recursion */
 std::vector<std::pair<int, int>> compute_ssum_card_set(const std::vector<int>& set, int alpha) {
 	if (set.size() == 0) return std::vector<std::pair<int, int>>({ {0, 0} });
 	if (set.size() == 1) return std::vector<std::pair<int, int>>({{set[0], 1}}); // if a set contains only one element
@@ -110,6 +111,35 @@ std::vector<std::pair<int, int>> compute_ssum_card_set(const std::vector<int>& s
 	/* Once calculated left and right (ssum, card)-sets, combine them using ssum_card_set_union() (lemma 2.11) */
 	return ssum_card_set_union(left_ssum_card_set, right_ssum_card_set, alpha, left_bound, right_bound);
 }
+/* Using for loop */
+//std::vector<std::pair<int, int>> compute_ssum_card_set(const std::vector<int>& set, int alpha) {
+//	if (set.size() == 0) return std::vector<std::pair<int, int>>({ {0, 0} });
+//	if (set.size() == 1) return std::vector<std::pair<int, int>>({{set[0], 1}}); // if a set contains only one element
+//
+//
+//	std::vector<std::vector<std::pair<int, int>>> curr_round;
+//	curr_round.reserve(set.size());
+//	for (auto el : set) {
+//		curr_round.push_back(std::vector<std::pair<int, int>>({ { el, 1 } }));
+//	}
+//
+//	std::vector<std::vector<std::pair<int, int>>> next_round;
+//	next_round.reserve(set.size());
+//
+//	while (curr_round.size() > 1) {
+//		if (curr_round.size() % 2 == 0) {
+//
+//		}	
+//		for (int i = 0; i < curr_round.size(); i += 2) {
+//
+//		}
+//
+//	}
+//
+//
+//}
+
+
 
 /* Lemma 2.13 */
 /*

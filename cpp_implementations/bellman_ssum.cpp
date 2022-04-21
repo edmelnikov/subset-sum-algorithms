@@ -3,10 +3,11 @@
 #include <iostream>
 #include <utility>
 #include <chrono>
-
+typedef unsigned long long int ull;
 
 std::pair<bool, double> bellman_ssum(const std::vector<int>& set, int target) {
 	std::vector<std::vector<int>> table(set.size(), std::vector<int>(target + 1, 0));
+
 
 	auto start_time = std::chrono::high_resolution_clock::now(); // time measurement
 
