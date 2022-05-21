@@ -49,7 +49,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -130,21 +130,23 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\user\Documents\studies\вкр\code\fftw;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\lib\mpir;C:\Users\user\Documents\studies\вкр\code\fftw;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\user\Documents\studies\вкр\code\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libfftw3-3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\user\Documents\studies\вкр\code\kfr\build\lib;C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\dll\mpir;C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\lib\mpir;C:\Users\user\Documents\studies\вкр\code\fftw;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mpir.lib;mpirxx.lib;libfftw3-3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bellman_ssum.cpp" />
     <ClCompile Include="bringmann_ssum.cpp" />
     <ClCompile Include="koiliaris_xu_ssum.cpp" />
+    <ClCompile Include="koiliaris_xu_ssum_2019.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="minkowski_sum.cpp" />
     <ClCompile Include="n_choose_k.cpp" />
@@ -152,7 +154,10 @@
   <ItemGroup>
     <ClInclude Include="bellman_ssum.h" />
     <ClInclude Include="bringmann_ssum.h" />
+    <ClInclude Include="convolution_fftw.h" />
+    <ClInclude Include="factorize.h" />
     <ClInclude Include="koiliaris_xu_ssum.h" />
+    <ClInclude Include="koiliaris_xu_ssum_2019.h" />
     <ClInclude Include="minkowski_sum.h" />
     <ClInclude Include="n_choose_k.h" />
   </ItemGroup>

@@ -1,2 +1,8 @@
 .vs/
 .ipynb_checkpoints/
+input.txt
+x64/Release/output.txt
+x64/Release/input.txt
+cpp_implementations/test_input.txt
+cpp_implementations/output.txt
+cpp_implementations/input.txt

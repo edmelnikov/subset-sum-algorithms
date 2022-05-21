@@ -10,143 +10,145 @@
 #include <time.h>
 #include <utility>
 #include <chrono>
+#include <random>
+#include <unordered_map>
 
 #include "minkowski_sum.h"
 #include "n_choose_k.h"
+#include "bellman_ssum.h"
 
 
+unsigned int seed = std::chrono::steady_clock::now().time_since_epoch().count();
+std::mt19937 r_eng(seed);
 
-std::vector<std::vector<int>> rand_part(const std::vector<int>& set, int num_parts) {
-
-	std::vector<std::vector<int>> partition(num_parts, std::vector<int>()); // partition of a set
-																			
-	// after both of these capacity changes back to zero?
-	//for (auto subset : partition) {
-	//	subset.reserve(set.size()); //  reserve enough space to avoid resizing during push_back()'s (maybe, it's a bit too much space?)
-	//	
-	//}
-	//for (int i = 0; i < set.size(); i++) {
-	//	partition.at(i).reserve(set.size());
-	//}
+/* Random partition of a set based on a hash table (unordered map) */
+std::unordered_map<int, std::vector<int>> rand_part(const std::vector<int>& set, int num_parts) {
+	std::unordered_map<int, std::vector<int>> set_partitioned; // hash table
+	std::uniform_int_distribution<int> distr(0, num_parts - 1);
 	
-	std::for_each(partition.begin(), partition.end(), [set](std::vector<int>& subset) { subset.reserve(set.size()); });
-
 	int color;
-
-	for (auto element : set) {
-		color = rand() % num_parts; // assign a random color
-		partition[color].push_back(element); // and push to the subset of that color
+	for (auto element : set) { 
+		//color = rand() % num_parts; // assign a random color
+		color = distr(r_eng); // O(1)
+		set_partitioned[color].push_back(element); // O(1), O(n) in the worst case
 	}
 
-	return partition;
+	return set_partitioned;
 }
 
 std::vector<int> ColorCoding(const std::vector<int>& set, int target, int k, double delta) {
 	/* Handle trivial cases */
 	if (k == 0) return std::vector<int>({});
-	if (k == 1)	return set;
-	if (set.size() == 0 || set.size() == 1) return set;
+	if (k == 1 || set.size() == 0 || set.size() == 1) return set;
 	if (set.size() == 2) return std::vector<int>({ set.front(), set.back(), set.front() + set.back() });
 
-	int num_iter = ceil((log((1 / delta)) / log((double)4/3)));
+	if (k >= set.size()) {
+		return get_ssums_dyn_table(set, target);
+	}
 
-	std::vector<std::vector<int>> set_partitioned;
+	// int num_iter = ceil((log((1 / delta)) / log((double)4/3)));
+	int num_iter = ceil(log2(1 / delta));
 	std::vector<int> mink_prod_united, mink_prod_united_old;
-	
-	/* Reserve space for all possible sums in mink_prod_united to avoid memory allocation */
-	// for that we will calculate number of combinations
-	//unsigned long long num_sums = 0;
-	//for (int i = 0; i <= set.size(); i++) {  // set.size() could be replaced with target later 
-	//	num_sums += n_choose_k(set.size(), i);
-	//}
-	//mink_prod_united.reserve(num_sums);
-	//mink_prod_united_old.reserve(num_sums);
-
-	for (int i = 0; i < num_iter; i++) {
-		set_partitioned = rand_part(set, k*k); // randomly partition into k^2 sets
+	for (int i = 0; i < num_iter; i++) { // iterate over iterations
+		std::unordered_map<int, std::vector<int>> set_partitioned = std::move(rand_part(set, k*k)); // randomly partition into k^2 sets
 		
-		// and calculate minkowski sum for all the sets
-		std::vector<int> minkowski_product = set_partitioned[0];
-		for (int j = 1; j < k * k; j++) {  
-			if (set_partitioned[j].size() > 0) {
-				minkowski_product = minkowski_add(minkowski_product, set_partitioned[j], target); // NOTE: minkowsky sum always returns a sorted set
-			}			
+		/* Calculate minkowsky sum across all subsets of a partition*/
+		std::vector<int> mink_prod = {};
+		for (auto subset : set_partitioned) { // iterate over map's key-value pairs
+			//mink_prod = std::move(minkowski_add(mink_prod, subset.second, target));
+			mink_prod = std::move(minkowski_sum_mpir(mink_prod, subset.second, target)); // possible copying?
 		}
+		
+		/* Unite */
+		mink_prod_united_old = std::move(mink_prod_united); // move elements to the buffer "mink_prod_united_old" in order to record the result to "mink_prod_united"
+		//mink_prod_united.clear(); // clear to insert back the result of unity
 
-		// unite minkowski sets
-		mink_prod_united_old = mink_prod_united; // copy elements to the buffer "mink_prod_united_old" in order to record the result to "mink_prod_united"
-		mink_prod_united.clear(); // clear to insert back the result of unity
 		std::set_union(
 			mink_prod_united_old.begin(),
 			mink_prod_united_old.end(),
-			minkowski_product.begin(),
-			minkowski_product.end(),
+			mink_prod.begin(),
+			mink_prod.end(),
 			std::back_inserter(mink_prod_united)
 		); 
-		//for (auto el : minkowski_product) {
+
+		//std::cout << "Result:  " << std::endl;
+		//for (auto el : mink_prod_united) {
 		//	std::cout << el << " ";
 		//}
 		//std::cout << std::endl;
 	}
-	
 	return mink_prod_united;
-
 }
 
+//
 std::vector<int> ColorCodingLayer(const std::vector<int>& set, int target, int layer, double delta) {
 	/* Handle trivial cases */
 	if (set.size() == 0 || set.size() == 1) return set;
 	if (set.size() == 2) return std::vector<int>({ set.front(), set.back(), set.front() + set.back() });
 
-	double log_layer_delta = log((double)layer / delta) / log(2);
+	/* Calculate log(ℓ/δ)*/
+	double log_layer_delta = log2((double)layer / delta);
+
+	/* Check if ℓ < log(ℓ/δ) */
 	if (layer < log_layer_delta) {
 		return ColorCoding(set, target, layer, delta);
+		// return set;
 	}
+	 
+	/* Calculate number of subsets */
+	int num_part = pow2_bs(ceil(log2(layer / log_layer_delta)));
 	
-	int num_part = pow(2, ceil(log(layer / log_layer_delta) / log(2))); // number of partitions
-	// std::cout << log_layer_delta << " " << num_part << std::endl;
-	std::vector<std::vector<int>> set_partitioned = rand_part(set, num_part);
-	std::vector<std::vector<int>> set_partitioned_ssums(num_part, std::vector<int>()); // subset sums of a partitioned set
+	/* Calculate k parameter of a subset */
+	int subset_k = 6 * log_layer_delta;
 
-	// std::vector<int> subset_sums;
+	//if (subset_k > set.size() / num_part) {
+	//	return get_ssums_dyn_table(set, target);
+	//}
 
-	for (int i = 0; i < num_part; i++) {
-		//std::cout << "Colorcoding parameters: t=" << ceil(2 * 6 * log_layer_delta * target / layer);
-		//std::cout << " k=" << ceil(6 * log_layer_delta) << " delta/layer=" << delta / layer << std::endl;
+	/* Randomly partition the set into num_part subsets */
+	std::unordered_map<int, std::vector<int>> set_partitioned = std::move(rand_part(set, num_part));
 
-		set_partitioned_ssums[i] = ColorCoding(
-			set_partitioned[i],
-			ceil(2*6*log_layer_delta*target/layer),
-			ceil(6*log_layer_delta),
+	/* Calculte subset sums of each subset of the partition with color coding */
+	std::vector<std::vector<int>> set_partitioned_ssums(set_partitioned.size(), std::vector<int>()); // vector of subset sums of each subset of the partition
+	int set_partitioned_ssums_ind = 0;	
+	for (auto subset : set_partitioned) { // iterate over subsets of a partitioned set
+
+		/* if k is larger than the size of a subset */		
+		// if (subset_k > subset.second.size()) subset_k = subset.second.size();
+
+		/* Calculate subset target and check if it's larger than the original target */
+		int subset_target = ceil(2 * subset_k * target / layer); // target of a subset
+		if (subset_target > target) subset_target = target;
+
+		/* Apply ColorCoding algorthm to the subset with the specified parameters */
+		set_partitioned_ssums[set_partitioned_ssums_ind] = std::move(ColorCoding(
+			subset.second, // use .second to access the subset itself since subset variable is a std::pair<int, int>
+			subset_target,
+			subset_k,
 			delta/layer
-			);
+			));
+		// set_partitioned_ssums[set_partitioned_ssums_ind] = std::move(subset.second);
+
+
+		set_partitioned_ssums_ind++;
 	}
 
-	// apply minkowski sum to all set_partitioned_ssums in a binary-tree-like way 
-	std::vector<std::vector<int>> curr_round = set_partitioned_ssums; // copying
-	
+	/* apply minkowski sum to all set_partitioned_ssums in a binary-tree-like way */
+	std::vector<std::vector<int>> curr_round = std::move(set_partitioned_ssums); 
 	std::vector<std::vector<int>> next_round;
-	/* calculate the highest number of ssums that can be sampled from the set */
-	//unsigned long long num_sums = 0; 
-	//for (int i = 0; i <= set.size(); i++) {  
-	//	num_sums += n_choose_k(set.size(), i);
-	//}	
-	//// std::vector<std::vector<int>> next_round(num_part, std::vector<int>());
-	//// std::for_each(next_round.begin(), next_round.end(), [num_sums](std::vector<int>& subset) { subset.reserve(num_sums); })
-	//next_round.reserve(num_part);  // reserve to fit all sets without resizing
-
-	for (int round = 0; round < log(num_part) / log(2); round++) { // iterate over levels of a tree from bottom to top (round = depth - level)
+	for (int round = 0; round < log2(num_part); round++) { // iterate over levels of a tree from bottom to top (round = depth - level)
 		for (int j = 0; j < curr_round.size(); j += 2) {
 			if (j + 1 < curr_round.size()) {
-				next_round.push_back(minkowski_add(curr_round[j], curr_round[j+1], pow(2, round + 1)*2*6*log_layer_delta*target/layer));
+				//next_round.push_back(minkowski_add(curr_round[j], curr_round[j+1], pow(2, round + 1)*2*6*log_layer_delta*target/layer));
+				next_round.push_back(std::move(minkowski_sum_mpir(curr_round[j], curr_round[j + 1], pow2_bs(round + 1) * 2 * 6 * log_layer_delta * target / layer)));
 			}
 			else {
 				next_round.push_back(curr_round[j]);
 			}
 		}
-		curr_round.clear();
-		curr_round = next_round;
-		next_round.clear();
+		//curr_round.clear();
+		curr_round = std::move(next_round);
+		// next_round.clear();
 	}
 
 	//for (auto set : curr_round) {
@@ -169,35 +171,42 @@ std::vector<int> ColorCodingLayer(const std::vector<int>& set, int target, int l
 			}
 		}
 	}
+
+	//std::cout << "---------------------------------------------------------------------------------------------" << std::endl;
+	//std::cout << "---ColorCodingLayer call completed. Parameters: set_size=" << set.size() << ", target=" << target << ", layer=" << layer << ", delta=" << delta << std::endl;
+	//std::cout << "---Estimated number of minkowski sum calls: " << layer*36*log_layer_delta* log_layer_delta + layer/log_layer_delta << std::endl;
+	//std::cout << "---Calculated number of minkowski sum calls: " <<  num_mink_calls << std::endl;
+	//std::cout << "---------------------------------------------------------------------------------------------" << std::endl;
+	num_mink_calls = 0;
+
 	return res;
 }
+
 
 std::pair<bool, double> bringmann_ssum(const std::vector<int>& set, int target, double delta) {
 	auto start_time = std::chrono::high_resolution_clock::now(); // time measurement
 
-	int num_layers = ceil(log(set.size()) / log(2)); // calculate number of layers
-
-	// std::vector<std::vector<int>> set_layers(num_layers, std::vector<int>()); // create a vector with layers
-	// std::for_each(set_layers.begin(), set_layers.end(), [set](std::vector<int>& layer) { layer.reserve(set.size()); });
+	/* Calculate number of layers */
+	int num_layers = ceil(log2(set.size())); // calculate number of layers
 	
 	std::vector<int> layer_set; // a vector containing a set of current layer 
 	layer_set.reserve(set.size()); // reserve enough space
 	int set_ind = 0; // index of a set's element
-	double right_bound = (double)target / pow(2, num_layers - 1); // right bound of current layer
+	double right_bound = (double)target / pow2_bs(num_layers - 1); // right bound of current layer
 	std::vector<int> layer_ssums; // all subset sums of current layer
 	std::vector<int> all_ssums = {}; // subset sums of all layers 
 
-	/* Iterate over layers backwards, adding elements from set in the process */
+	/* iterate over layers backwards, adding elements from the set in the process */
 	for (int layer_ind = num_layers - 1; layer_ind >= 0; layer_ind--) {
-		// NOTE: this code ignores elements higher than target 
+		// note: this code ignores elements higher than target 
 		while (set[set_ind] <= right_bound && set_ind < set.size()) { // check if current set's item fits into the layer
 			layer_set.push_back(set[set_ind]); // if it does, add it to current layer
 			set_ind++; // and increment index of a set
 		}
-		right_bound = (double)target / pow(2, layer_ind - 1); // recalculate the right bound once all the items have been added to current layer
+		right_bound = (double)target / pow2_bs(layer_ind - 1); // recalculate the right bound once all the items have been added to current layer
 		
 
-		//std::cout << "Color coding layer call with target " << target << ", layer " << pow(2, layer_ind + 1);
+		//std::cout << "color coding layer call with target " << target << ", layer " << pow(2, layer_ind + 1);
 		//std::cout << ", error probability " << delta / num_layers << std::endl;
 		//std::cout << "set " << std::endl;
 		//for (auto el : layer_set) {
@@ -205,9 +214,18 @@ std::pair<bool, double> bringmann_ssum(const std::vector<int>& set, int target, 
 		//}
 		//std::cout << std::endl;
 
-		layer_ssums = ColorCodingLayer(layer_set, target, pow(2, layer_ind + 1), delta/num_layers); // calculate all subset sums of a layer
-			
-		all_ssums = minkowski_add(all_ssums, layer_ssums, target); // NOTE: minkowsky sum always returns a sorted set
+		if (layer_ind > 5) {
+			layer_ssums = std::move(get_ssums_dyn_table(layer_set, target));
+		}
+		else {
+			/* Call ColorCodingLayer algorithm for current layer */
+			layer_ssums = std::move(ColorCodingLayer(layer_set, target, pow2_bs(layer_ind + 1), delta / num_layers)); // calculate all subset sums of a layer
+		}
+
+		
+		//all_ssums = std::move(minkowski_add(all_ssums, layer_ssums, target)); // note: minkowsky sum always returns a sorted set
+		all_ssums = std::move(minkowski_sum_mpir(all_ssums, layer_ssums, target));
+
 		layer_set.clear();
 	}
 

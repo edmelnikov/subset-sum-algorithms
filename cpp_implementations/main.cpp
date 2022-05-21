@@ -5,27 +5,38 @@
 #include "bringmann_ssum.h"
 #include "bellman_ssum.h"
 #include "n_choose_k.h"
-#include "koiliaris_xu_ssum.h"
+// #include "koiliaris_xu_ssum.h"
+#include "koiliaris_xu_ssum_2019.h"
 
-#include <vector>
+// #include <vector>
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
+#include <random>
 
+#include <stdio.h>
+#include <mpir.h>
+#include <mpirxx.h>
+#include <unordered_map>
+//#include <kfr/all.hpp>
+//#include <kfr/dft.hpp>
+
+
+// using namespace kfr;
 typedef unsigned long long ull;
 
 std::pair<bool, double> test_algorithm(const std::vector<int>& set, int target, int num_runs, std::string alg_name, double delta = 0.1) {
 
-	std::pair<bool, double> solution;
+	std::pair<bool, double> solution = {};
 	double mean_time = 0;
 	for (int run = 0; run < num_runs; run++) {
 		if (alg_name == "bellman") {
 			solution = bellman_ssum(set, target);
 		}
-		//else if (alg_name == "koiliaris_xu") {
-		//	solution = koiliaris_xu_ssum(set, target);
-		//}
+		else if (alg_name == "koiliaris_xu") {
+			solution = koiliaris_xu_ssum(set, target);
+		}
 		else if (alg_name == "bringmann") {
 			solution = bringmann_ssum(set, target, delta);
 		}
@@ -39,6 +50,8 @@ std::pair<bool, double> test_algorithm(const std::vector<int>& set, int target, 
 
 // SETS OF INTEGERS MUST BE SORTED!
 int main(int argc, char *argv[]) {
+
+
 	std::cout << "---------------------------------------------------" << std::endl;
 	//std::vector<std::pair<int, int>> set1 = { {3, 1}, {4, 2}, {5, 2} };
 	//std::vector<std::pair<int, int>> set2 = { {1, 1}, {2, 2}, {3, 3} };
@@ -95,19 +108,81 @@ int main(int argc, char *argv[]) {
 		/* Check algorithm name */
 		if (algorithm == "all") {
 			std::cout << "--- Running all algorithms ---" << std::endl;
-
-			auto bellman_solution = test_algorithm(set, target, num_runs, "bellman");
-			std::cout << "Bellman solution: " << bellman_solution.first << ", time: " << bellman_solution.second << " ms" << std::endl;
-			bellman_solution = bellman_ssum(set, target);
-
-			//auto koiliaris_xu_solution = test_algorithm(set, target, num_runs, "koiliaris_xu");
-			//std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
 			
-			srand(time(0));
-			auto bringmann_solution = test_algorithm(set, target, num_runs, "bringmann", 0.2);
-			std::cout << "bringmann solution: " << bringmann_solution.first << ", time: " << bringmann_solution.second << " ms" << std::endl;
-		
+			
+			// mpz_init(bin);
+
+			//std::vector<int> v1 = {2, 3, 4};
+			//std::vector<int> v2 = {5, 7, 10};
+			//
+			//std::vector<int> res = minkowski_sum_fft(v1, v2, 10);
+
+			//for (auto el : res) {
+			//	std::cout << el << ", ";
+			//}
+
+			std::vector<std::pair<int, int>> sc1 = { {3, 4}, {1, 5} };
+			std::vector<std::pair<int, int>> sc2 = { {1, 3}, {10, 5} };
+
+			std::vector<std::pair<int, int>> res = minkowski_sum_fft2d(sc1, sc2, 11);
+
+			for (auto pair : res) {
+				std::cout << "(" << pair.first << ", " << pair.second << ") ";
+			}
+
 			return 0;
+		}
+		else if (algorithm == "colorcodinglayer") {
+		std::cout << "--- Running ColorCodingLayer function ---" << std::endl;
+
+		double mean_time = 0;
+		for (int run = 0; run < num_runs; run++) {
+			auto start_time = std::chrono::high_resolution_clock::now();
+			ColorCodingLayer(set, target, 16, 0.1);
+			auto end_time = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+			mean_time += running_time.count();
+		}
+		std::cout << mean_time / num_runs << std::endl;
+
+		fout << 0 << std::endl;
+		fout << mean_time / num_runs << std::endl;
+		}
+		else if (algorithm == "colorcoding") {
+		std::cout << "--- Running ColorCoding function ---" << std::endl;
+
+		double mean_time = 0;
+		for (int run = 0; run < num_runs; run++) {
+			auto start_time = std::chrono::high_resolution_clock::now();
+			ColorCoding(set, target, 10, 0.1);
+			auto end_time = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+			mean_time += running_time.count();
+		}
+		std::cout << mean_time / num_runs << std::endl;
+
+		fout << 0 << std::endl;
+		fout << mean_time / num_runs << std::endl;
+		}
+
+		else if (algorithm == "minkowski") {
+			std::cout << "--- Running Minkowski sum ---" << std::endl;
+
+			double mean_time = 0;
+			for (int run = 0; run < num_runs; run++) {
+				auto start_time = std::chrono::high_resolution_clock::now();
+				//minkowski_sum_mpir(set, set, set.back());
+				minkowski_sum_fft(set, set, set.back());
+				
+				auto end_time = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+				mean_time += running_time.count();
+				
+			}
+			std::cout <<  mean_time/num_runs << std::endl;
+
+			fout << 0 << std::endl;
+			fout << mean_time/ num_runs << std::endl;
 		}
 		else if (algorithm == "bellman") {
 			std::cout << "--- Running Bellman's algorithm ---" << std::endl;
@@ -119,16 +194,15 @@ int main(int argc, char *argv[]) {
 
 			return 0;
 		}
-		//else if (algorithm == "koiliaris_xu") {
-		//	std::cout << "--- Running Koiliaris & Xu's algorithm --- " << std::endl;
-		//	auto koiliaris_xu_solution = test_algorithm(set, target, num_runs, "koiliaris_xu");
-		//	std::cout << "Koiliaris & Xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
-		//	fout << koiliaris_xu_solution.first << std::endl;
-		//	fout << koiliaris_xu_solution.second << std::endl;
+		else if (algorithm == "koiliaris_xu") {
+			std::cout << "--- running koiliaris & xu's algorithm --- " << std::endl;
+			auto koiliaris_xu_solution = test_algorithm(set, target, num_runs, "koiliaris_xu");
+			std::cout << "koiliaris & xu solution: " << koiliaris_xu_solution.first << ", time: " << koiliaris_xu_solution.second << " ms" << std::endl;
+			fout << koiliaris_xu_solution.first << std::endl;
+			fout << koiliaris_xu_solution.second << std::endl;
 
-
-		//	return 0;
-		//}
+			return 0;
+		}
 		else if (algorithm == "bringmann") {
 			std::cout << "--- running bringmann's algorithm ---" << std::endl;
 			srand(time(0));

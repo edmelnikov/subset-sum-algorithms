@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\FFTW_conv">
+      <UniqueIdentifier>{df32ceb9-b614-41c0-b9fb-4988658454b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,6 +36,9 @@
     <ClCompile Include="koiliaris_xu_ssum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="koiliaris_xu_ssum_2019.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bellman_ssum.h">
@@ -49,6 +55,15 @@
     </ClInclude>
     <ClInclude Include="koiliaris_xu_ssum.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="koiliaris_xu_ssum_2019.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="convolution_fftw.h">
+      <Filter>Header Files\FFTW_conv</Filter>
+    </ClInclude>
+    <ClInclude Include="factorize.h">
+      <Filter>Header Files\FFTW_conv</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
