@@ -1,5 +1,25 @@
-﻿  koiliaris_xu_ssum_2019.cpp
-C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum_2019.cpp(22,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum_2019.cpp(71,18): warning C4244: 'initializing': conversion from 'unsigned __int64' to 'double', possible loss of data
-C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum_2019.cpp(73,15): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+﻿  bellman_ssum.cpp
+  bringmann_ssum.cpp
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(23,19): warning C4244: 'initializing': conversion from '_Rep' to 'unsigned int', possible loss of data
+          with
+          [
+              _Rep=__int64
+          ]
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(55,15): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(99,29): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(102,15): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(113,21): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(134,142): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(163,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  koiliaris_xu_ssum.cpp
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(30,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(84,18): warning C4244: 'initializing': conversion from 'unsigned __int64' to 'double', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(86,15): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  koiliaris_xu_ssum_2016.cpp
+  main.cpp
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\main.cpp(169,14): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  minkowski_sum.cpp
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\minkowski_sum.cpp(600,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\minkowski_sum.cpp(645,54): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
   cpp_implementations.vcxproj -> C:\Users\user\Documents\studies\вкр\code\cpp_implementations\x64\Release\cpp_implementations.exe

@@ -1,3 +1,6 @@
+/* 
+The code below has been retrieved from https://github.com/jeremyfix/FFTConvolution
+*/
 #ifndef FACTORIZE_H
 #define FACTORIZE_H
 

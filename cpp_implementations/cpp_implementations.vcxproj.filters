@@ -33,10 +33,10 @@
     <ClCompile Include="n_choose_k.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="koiliaris_xu_ssum.cpp">
+    <ClCompile Include="koiliaris_xu_ssum_2016.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="koiliaris_xu_ssum_2019.cpp">
+    <ClCompile Include="koiliaris_xu_ssum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +53,10 @@
     <ClInclude Include="n_choose_k.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="koiliaris_xu_ssum.h">
+    <ClInclude Include="koiliaris_xu_ssum_2016.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="koiliaris_xu_ssum_2019.h">
+    <ClInclude Include="koiliaris_xu_ssum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="convolution_fftw.h">

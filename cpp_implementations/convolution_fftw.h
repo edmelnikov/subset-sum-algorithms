@@ -1,3 +1,8 @@
+/*
+FFT convolution implementation using FFTW
+The code below has been retrieved from https://github.com/jeremyfix/FFTConvolution
+*/
+
 #ifndef CONVOLUTION_FFTW_H
 #define CONVOLUTION_FFTW_H
 

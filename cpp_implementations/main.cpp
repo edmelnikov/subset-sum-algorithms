@@ -1,20 +1,11 @@
 #include <iostream>
 #include <chrono>
-#include "fftw3.h"
-#include "minkowski_sum.h"
-#include "bringmann_ssum.h"
-#include "bellman_ssum.h"
-#include "n_choose_k.h"
-// #include "koiliaris_xu_ssum.h"
-#include "koiliaris_xu_ssum_2019.h"
-
-// #include <vector>
+#include <vector>
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <random>
-
 #include <stdio.h>
 #include <mpir.h>
 #include <mpirxx.h>
@@ -22,9 +13,12 @@
 //#include <kfr/all.hpp>
 //#include <kfr/dft.hpp>
 
-
-// using namespace kfr;
-typedef unsigned long long ull;
+#include "fftw3.h"
+#include "minkowski_sum.h"
+#include "bringmann_ssum.h"
+#include "bellman_ssum.h"
+#include "n_choose_k.h"
+#include "koiliaris_xu_ssum.h"
 
 std::pair<bool, double> test_algorithm(const std::vector<int>& set, int target, int num_runs, std::string alg_name, double delta = 0.1) {
 
@@ -51,17 +45,7 @@ std::pair<bool, double> test_algorithm(const std::vector<int>& set, int target, 
 // SETS OF INTEGERS MUST BE SORTED!
 int main(int argc, char *argv[]) {
 
-
 	std::cout << "---------------------------------------------------" << std::endl;
-	//std::vector<std::pair<int, int>> set1 = { {3, 1}, {4, 2}, {5, 2} };
-	//std::vector<std::pair<int, int>> set2 = { {1, 1}, {2, 2}, {3, 3} };
-	//	std::vector<std::pair<int, int>> set = minkowski_add_2d(set1, set2);
-	//for (auto el : set) {
-	//	std::cout << "(" << el.first << ", " << el.second << ") ";
-	//	std::cout << std::endl;
-	//}
-	//std::cout << std::endl;
-
 	if (argc == 0) {
 		std::cout << "Input file is not specified! " << std::endl;
 		return 1;
@@ -106,63 +90,40 @@ int main(int argc, char *argv[]) {
 		std::cout << "Target: " << target << std::endl << std::endl;
 	
 		/* Check algorithm name */
-		if (algorithm == "all") {
-			std::cout << "--- Running all algorithms ---" << std::endl;
-			
-			
-			// mpz_init(bin);
-
-			//std::vector<int> v1 = {2, 3, 4};
-			//std::vector<int> v2 = {5, 7, 10};
-			//
-			//std::vector<int> res = minkowski_sum_fft(v1, v2, 10);
-
-			//for (auto el : res) {
-			//	std::cout << el << ", ";
-			//}
-
-			std::vector<std::pair<int, int>> sc1 = { {3, 4}, {1, 5} };
-			std::vector<std::pair<int, int>> sc2 = { {1, 3}, {10, 5} };
-
-			std::vector<std::pair<int, int>> res = minkowski_sum_fft2d(sc1, sc2, 11);
-
-			for (auto pair : res) {
-				std::cout << "(" << pair.first << ", " << pair.second << ") ";
-			}
-
+		if (algorithm == "test") { // for testing
 			return 0;
 		}
 		else if (algorithm == "colorcodinglayer") {
-		std::cout << "--- Running ColorCodingLayer function ---" << std::endl;
+			std::cout << "--- Running ColorCodingLayer function ---" << std::endl;
 
-		double mean_time = 0;
-		for (int run = 0; run < num_runs; run++) {
-			auto start_time = std::chrono::high_resolution_clock::now();
-			ColorCodingLayer(set, target, 16, 0.1);
-			auto end_time = std::chrono::high_resolution_clock::now();
-			std::chrono::duration<double, std::milli> running_time = end_time - start_time;
-			mean_time += running_time.count();
-		}
-		std::cout << mean_time / num_runs << std::endl;
+			double mean_time = 0;
+			for (int run = 0; run < num_runs; run++) {
+				auto start_time = std::chrono::high_resolution_clock::now();
+				ColorCodingLayer(set, target, 16, 0.1);
+				auto end_time = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+				mean_time += running_time.count();
+			}
+			std::cout << mean_time / num_runs << std::endl;
 
-		fout << 0 << std::endl;
-		fout << mean_time / num_runs << std::endl;
+			fout << 0 << std::endl;
+			fout << mean_time / num_runs << std::endl;
 		}
 		else if (algorithm == "colorcoding") {
-		std::cout << "--- Running ColorCoding function ---" << std::endl;
+			std::cout << "--- Running ColorCoding function ---" << std::endl;
 
-		double mean_time = 0;
-		for (int run = 0; run < num_runs; run++) {
-			auto start_time = std::chrono::high_resolution_clock::now();
-			ColorCoding(set, target, 10, 0.1);
-			auto end_time = std::chrono::high_resolution_clock::now();
-			std::chrono::duration<double, std::milli> running_time = end_time - start_time;
-			mean_time += running_time.count();
-		}
-		std::cout << mean_time / num_runs << std::endl;
+			double mean_time = 0;
+			for (int run = 0; run < num_runs; run++) {
+				auto start_time = std::chrono::high_resolution_clock::now();
+				ColorCoding(set, target, 10, 0.1);
+				auto end_time = std::chrono::high_resolution_clock::now();
+				std::chrono::duration<double, std::milli> running_time = end_time - start_time;
+				mean_time += running_time.count();
+			}
+			std::cout << mean_time / num_runs << std::endl;
 
-		fout << 0 << std::endl;
-		fout << mean_time / num_runs << std::endl;
+			fout << 0 << std::endl;
+			fout << mean_time / num_runs << std::endl;
 		}
 
 		else if (algorithm == "minkowski") {
