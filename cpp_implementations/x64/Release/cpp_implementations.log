@@ -11,15 +11,16 @@ C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementati
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(113,21): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(134,142): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\bringmann_ssum.cpp(163,17): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  koiliaris_xu_ssum_2016.cpp
   koiliaris_xu_ssum.cpp
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(30,33): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(84,18): warning C4244: 'initializing': conversion from 'unsigned __int64' to 'double', possible loss of data
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\koiliaris_xu_ssum.cpp(86,15): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  koiliaris_xu_ssum_2016.cpp
   main.cpp
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\main.cpp(169,14): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   minkowski_sum.cpp
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\minkowski_sum.cpp(600,19): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
 C:\Users\user\Documents\studies\вкр\code\cpp_implementations\cpp_implementations\minkowski_sum.cpp(645,54): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  n_choose_k.cpp
   Generating Code...
   cpp_implementations.vcxproj -> C:\Users\user\Documents\studies\вкр\code\cpp_implementations\x64\Release\cpp_implementations.exe
